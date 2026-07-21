@@ -9,11 +9,6 @@ st.markdown("Isi form berikut untuk menghasilkan file Nota Dinas berdasarkan tem
 
 if "peserta" not in st.session_state:
     st.session_state.peserta = [{"nama": "", "nip": "", "jabatan": ""}]
-if "tembusan" not in st.session_state:
-    st.session_state.tembusan = [
-        {"nama": "", "nip": "", "jabatan": ""},
-        {"nama": "", "nip": "", "jabatan": ""},
-    ]
 
 # --- Sidebar: Dynamic lists with plain buttons ---
 st.sidebar.header("Kelola Peserta")
@@ -28,20 +23,6 @@ for idx, p in enumerate(st.session_state.peserta):
 
 if st.sidebar.button("Tambah Peserta"):
     st.session_state.peserta.append({"nama": "", "nip": "", "jabatan": ""})
-    st.rerun()
-
-st.sidebar.header("Kelola Tembusan")
-for idx, t in enumerate(st.session_state.tembusan):
-    nama_t = st.sidebar.text_input("Nama", key=f"tembusan_nama_{idx}", label_visibility="collapsed")
-    nip_t = st.sidebar.text_input("NIP", key=f"tembusan_nip_{idx}", label_visibility="collapsed")
-    jabatan_t = st.sidebar.text_input("Jabatan", key=f"tembusan_jab_{idx}", label_visibility="collapsed")
-    if st.sidebar.button("Hapus", key=f"tembusan_del_{idx}"):
-        if len(st.session_state.tembusan) > 1:
-            st.session_state.tembusan.pop(idx)
-            st.rerun()
-
-if st.sidebar.button("Tambah Tembusan"):
-    st.session_state.tembusan.append({"nama": "", "nip": "", "jabatan": ""})
     st.rerun()
 
 # --- Main form ---
@@ -87,15 +68,6 @@ if submitted:
             "jabatan": st.session_state.get(f"peserta_jab_{idx}", ""),
         })
 
-    # Collect tembusan data
-    tembusan_data = []
-    for idx in range(len(st.session_state.tembusan)):
-        tembusan_data.append({
-            "nama": st.session_state.get(f"tembusan_nama_{idx}", ""),
-            "nip": st.session_state.get(f"tembusan_nip_{idx}", ""),
-            "jabatan": st.session_state.get(f"tembusan_jab_{idx}", ""),
-        })
-
     try:
         with tempfile.TemporaryDirectory() as tmpdir:
             out_path = os.path.join(tmpdir, "nota_dinas_isi.docx")
@@ -119,7 +91,7 @@ if submitted:
                 tempat=pel_tempat,
             )
             filler.fill_kesimpulan(kesimpulan)
-            filler.fill_tembusan(tembusan_data)
+            filler.fill_tembusan([])
             filler.save(out_path)
 
             with open(out_path, "rb") as f:
